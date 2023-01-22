@@ -1,0 +1,13 @@
+---
+- name: Update VM
+  block:
+
+    - name: Update Nextcloud of {{ inventory_hostname }}
+      become: true
+      delegate_to: "{{ inventory_hostname }}"
+      command: sudo -u www-data php /var/www/nextcloud/updater/updater.phar --no-interaction
+    
+    - name: Update Apps of {{ inventory_hostname }}
+      become: true
+      delegate_to: "{{ inventory_hostname }}"
+      command: sudo -u www-data php /var/www/nextcloud/occ app:update --all --no-interaction

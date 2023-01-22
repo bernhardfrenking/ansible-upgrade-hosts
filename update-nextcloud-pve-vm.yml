@@ -1,0 +1,22 @@
+---
+- hosts: "nextcloud"
+  gather_facts: false
+  name: "Update Nextcloud on proxmox VM's"
+  roles:
+
+    - name: Logon to Proxmox host
+      delegate_to: localhost
+      role: logon-pve
+
+    - name: Get information about VM's
+      delegate_to: localhost
+      role: pve-vm-infos   
+
+    - name: Boot and take snapshot for VM's running on Proxmox
+      role: pre-steps-pve-vm
+
+    - name: Update Nextcloud on Proxmox VM
+      role: update-nextcloud-pve-vm
+
+    - name: Restore VM state for VM's running on Proxmox
+      role: post-steps-pve-vm
