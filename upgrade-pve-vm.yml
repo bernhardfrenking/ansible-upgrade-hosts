@@ -1,0 +1,22 @@
+---
+- hosts: "pve_vm"
+  gather_facts: false
+  name: "Upgrade proxmox VM's"
+  roles:
+
+    - name: Logon to Proxmox host
+      delegate_to: localhost
+      role: logon-pve
+
+    - name: Get information about VM's
+      delegate_to: localhost
+      role: pve-vm-infos   
+
+    - name: Pre steps - e.g. Boot and take snapshot for VM's running on Proxmox
+      role: pre-steps-pve-vm
+
+    - name: Upgrade VM's running on Proxmox
+      role: upgrade-pve-vm
+
+    - name: Post steps - e.g. restore VM state for VM's running on Proxmox
+      role: post-steps-pve-vm

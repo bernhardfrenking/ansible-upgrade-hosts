@@ -1,0 +1,44 @@
+---
+- name: Update VM
+  block:
+
+    # - name: Display inventory_hostname.upgrade.snapshot
+    #   debug: 
+    #     var: hostvars[inventory_hostname].upgrade.snapshot
+
+    - name: Update VM {{ inventory_hostname }} with apt
+      apt:
+        force_apt_get: yes
+        name: "*"
+        state: latest
+        update_cache: yes
+      become: true
+      when: vm_facts.ansible_facts.ansible_os_family == 'Debian'
+    
+    - name: Update VM {{ inventory_hostname }} with yum
+      yum:
+        name: "*"
+        state: latest
+        update_cache: yes
+        lock_timeout: 120
+      become: true
+      when: vm_facts.ansible_facts.ansible_os_family == 'RedHat'
+
+    - name: Install Prerequisite Packages for OpenSuse / SLES
+      package:
+        name:
+          - python-xml
+          - zypper
+          - rpm
+        state: present
+      become: true
+      when: vm_facts.ansible_facts.ansible_os_family == 'Suse'
+
+    - name: Update VM {{ inventory_hostname }} with zypper
+      zypper:
+        name: "*"
+        state: latest
+        update_cache: yes
+        type: patch
+      become: true
+      when: vm_facts.ansible_facts.ansible_os_family == 'Suse'

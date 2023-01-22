@@ -1,0 +1,31 @@
+---
+- name: Update VM
+  block:
+
+    # - name: Display vm_status.json.data.status
+    #   debug: 
+    #     var: vm_status.json.data.status
+   
+    - name: Shutdown VM {{ inventory_hostname }} when it was stopped before patching
+      delegate_to: localhost
+      uri:
+        method: POST
+        validate_certs: no
+        url: "https://{{ proxmox_api_host }}:{{ proxmox_api_port }}/api2/json/nodes/{{ vm_node }}/{{ vm_type }}/{{ vm_id }}/status/shutdown"
+        headers: "{{ proxmox_api_cookie }}"
+        body_format: form-urlencoded
+        body:
+          forceStop: 1
+      when: vm_status.json.data.status == 'stopped'
+
+    - name: Check if a Reboot is required for Debian / Ubuntu
+      stat:
+        path: /var/run/reboot-required
+      become: true
+      register: reboot_required
+      when: (not vm_status.json.data.status == 'stopped') and (hostvars[inventory_hostname].upgrade.reboot_if_required|default(false)) and (vm_facts.ansible_facts.ansible_os_family == 'Debian')
+
+    - name: Reboot VM after Update
+      reboot:
+      become: true
+      when: (reboot_required.stat.exists|default(false))

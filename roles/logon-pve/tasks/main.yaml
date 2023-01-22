@@ -1,0 +1,19 @@
+- name: Logon to Proxmox Server
+  uri:
+    method: POST
+    validate_certs: no
+    return_content: yes
+    url: "https://{{ proxmox_api_host }}:8006/api2/json/access/ticket"
+    body_format: json
+    body:
+      username: "{{ proxmox_api_user }}"
+      password: "{{ proxmox_api_password }}"
+  register: proxmox_session
+  become: false
+
+- name: parse cookie data
+  set_fact:
+    proxmox_api_cookie:
+      Cookie: "PVEAuthCookie={{ proxmox_session.json.data.ticket }}"
+      CSRFPreventionToken: "{{ proxmox_session.json.data.CSRFPreventionToken }}"
+  no_log: true

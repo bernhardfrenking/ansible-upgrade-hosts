@@ -1,0 +1,12 @@
+- name: get information about all vms in the cluster
+  uri:
+    method: GET
+    validate_certs: no
+    url: "https://{{ proxmox_api_host }}:8006/api2/json/cluster/resources?type=vm"
+    headers: "{{ proxmox_api_cookie }}"
+  register: proxmox_cluster_information
+
+# debug
+#- name: display the contents of the 'proxmox_cluster_information' variable
+#  debug: 
+#    var: proxmox_cluster_information
